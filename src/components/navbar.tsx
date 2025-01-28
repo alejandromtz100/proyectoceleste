@@ -96,7 +96,7 @@ const Navbar: React.FC = () => {
       console.error("Error al cerrar sesión:", error);
     }
   };
-
+// para marcar una notificacion como leido
   const handleNotificationRead = async (notificationId: string) => {
     try {
       const response = await fetch(
