@@ -21,7 +21,7 @@ const Inicioadmin: React.FC = () => {
     {
       id: 1,
       tipo: 'Solicitud de reparación',
-      descripcion: 'Fuga de agua en el departamento 302',
+      descripcion: 'Fuga de agua en el baño en el departamento 302',
       fecha: '15/10/2023',
       icono: <FaTools className="text-4xl text-cyan-600" />,
     },

@@ -1,7 +1,18 @@
-import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, Paper, CircularProgress } from '@mui/material';
-import Swal from 'sweetalert2';
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Paper,
+  CircularProgress,
+  Dialog,
+  Grid,
+} from '@mui/material';
+import { CSSTransition } from 'react-transition-group';
 import Navbar from '../components/navbar';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import '../css/Montos.css';
 
 const Montos: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -12,13 +23,59 @@ const Montos: React.FC = () => {
     department: '',
     tower: '',
   });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  // Estado para controlar el tiempo de debounce
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  // Función para buscar el usuario por nombre y actualizar los campos de departamento y torre
+  const fetchUserData = async (userName: string) => {
+    if (userName.trim() !== "") {
+      try {
+        const response = await fetch(`http://localhost:4000/api/users/search?name=${userName}`);
+        if (!response.ok) {
+          throw new Error('Error al obtener el usuario');
+        }
+        const foundUser = await response.json();
+        setFormData((prev) => ({
+          ...prev,
+          department: foundUser.department,
+          tower: foundUser.tower,
+        }));
+      } catch (error) {
+        console.error('Error al buscar el usuario por nombre', error);
+      }
+    }
+  };
+
+  // useEffect para hacer el debounce y llamar a fetchUserData cada vez que se modifica el nombre
+  useEffect(() => {
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+    }
+    // Si el campo "name" tiene contenido, se establece un retardo de 500ms para llamar a la función de búsqueda
+    if (formData.name.trim() !== "") {
+      const timeout = setTimeout(() => {
+        fetchUserData(formData.name);
+      }, 500);
+      setTypingTimeout(timeout);
+    } else {
+      // Si se borra el nombre, también se limpian los campos de departamento y torre
+      setFormData((prev) => ({ ...prev, department: '', tower: '' }));
+    }
+    // Cleanup: se limpia el timeout en cada cambio
+    return () => {
+      if (typingTimeout) clearTimeout(typingTimeout);
+    };
+  }, [formData.name]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,135 +91,244 @@ const Montos: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Error al registrar el monto.');
+        throw new Error('Error al registrar la multa.');
       }
 
       const data = await response.json();
       console.log('Respuesta del servidor:', data);
 
-      Swal.fire({
-        icon: 'success',
-        title: '¡Éxito!',
-        text: 'Monto registrado correctamente.',
-        confirmButtonColor: '#3085d6',
-      });
-
-      setFormData({
-        name: '',
-        description: '',
-        amount: '',
-        date: '',
-        department: '',
-        tower: '',
-      });
+      // Simula un retardo para visualizar la animación de carga
+      setTimeout(() => {
+        setShowModal(true);
+        setFormData({
+          name: '',
+          description: '',
+          amount: '',
+          date: '',
+          department: '',
+          tower: '',
+        });
+        setIsSubmitting(false);
+      }, 2000);
     } catch (error) {
-      console.error(error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Ocurrió un error al enviar el formulario.',
-        confirmButtonColor: '#d33',
-      });
-    } finally {
+      console.error('Ocurrió un error al enviar el formulario.', error);
       setIsSubmitting(false);
     }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
   };
 
   return (
     <>
       <Navbar />
-      <Box sx={{ padding: 4, backgroundColor: '#f9f9f9', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Paper elevation={3} sx={{ maxWidth: '600px', width: '100%', padding: 4, borderRadius: '12px' }}>
-          <Typography variant="h4" gutterBottom align="center" sx={{ fontWeight: 'bold', marginBottom: 4, color: '#333' }}>
-            Registro de Montos
+      <Box
+        sx={{
+          padding: 4,
+          backgroundColor: '#f5f5f5',
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Paper
+          elevation={6}
+          sx={{
+            maxWidth: '800px',
+            width: '100%',
+            padding: 4,
+            borderRadius: '16px',
+            position: 'relative',
+            background: '#ffffff',
+          }}
+        >
+          <Typography
+            variant="h4"
+            gutterBottom
+            align="center"
+            sx={{
+              fontWeight: 'bold',
+              marginBottom: 3,
+              color: '#37474f',
+            }}
+          >
+            Registro de Multa
           </Typography>
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Nombre"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              margin="normal"
-              variant="outlined"
-              required
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Descripción"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              margin="normal"
-              variant="outlined"
-              multiline
-              rows={4}
-              required
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Monto"
-              name="amount"
-              type="number"
-              value={formData.amount}
-              onChange={handleChange}
-              margin="normal"
-              variant="outlined"
-              required
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Fecha"
-              name="date"
-              type="date"
-              value={formData.date}
-              onChange={handleChange}
-              margin="normal"
-              variant="outlined"
-              InputLabelProps={{ shrink: true }}
-              required
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Departamento"
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              margin="normal"
-              variant="outlined"
-              required
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Torre"
-              name="tower"
-              value={formData.tower}
-              onChange={handleChange}
-              margin="normal"
-              variant="outlined"
-              required
-              sx={{ mb: 3 }}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              disabled={isSubmitting}
-              sx={{ padding: 1.5, borderRadius: '8px', textTransform: 'none', fontSize: '16px' }}
-            >
-              {isSubmitting ? <CircularProgress size={24} /> : 'Registrar'}
-            </Button>
+          <form
+            onSubmit={handleSubmit}
+            style={{
+              opacity: isSubmitting ? 0.5 : 1,
+              pointerEvents: isSubmitting ? 'none' : 'auto',
+            }}
+          >
+            <Grid container spacing={2}>
+              {/* Primera fila: Nombre y Monto */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Nombre"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  variant="outlined"
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Monto"
+                  name="amount"
+                  type="number"
+                  value={formData.amount}
+                  onChange={handleChange}
+                  variant="outlined"
+                  required
+                />
+              </Grid>
+
+              {/* Segunda fila: Descripción */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Descripción"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  variant="outlined"
+                  multiline
+                  rows={4}
+                  required
+                />
+              </Grid>
+
+              {/* Tercera fila: Fecha y Departamento */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Fecha"
+                  name="date"
+                  type="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  variant="outlined"
+                  InputLabelProps={{ shrink: true }}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Departamento"
+                  name="department"
+                  value={formData.department}
+                  onChange={handleChange}
+                  variant="outlined"
+                  required
+                />
+              </Grid>
+
+              {/* Cuarta fila: Torre */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Torre"
+                  name="tower"
+                  value={formData.tower}
+                  onChange={handleChange}
+                  variant="outlined"
+                  required
+                />
+              </Grid>
+
+              {/* Botón de envío */}
+              <Grid item xs={12}>
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  disabled={isSubmitting}
+                  sx={{
+                    padding: 1.5,
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontSize: '16px',
+                    boxShadow: '0px 3px 6px rgba(0,0,0,0.16)',
+                  }}
+                >
+                  Registrar
+                </Button>
+              </Grid>
+            </Grid>
           </form>
+          {isSubmitting && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '16px',
+              }}
+            >
+              <CircularProgress size={50} />
+            </Box>
+          )}
         </Paper>
       </Box>
+
+      {/* Modal */}
+      <CSSTransition in={showModal} timeout={300} classNames="modal" unmountOnExit>
+        <Dialog
+          open={showModal}
+          onClose={handleCloseModal}
+          PaperProps={{
+            sx: {
+              background: 'linear-gradient(135deg, #d0e8f2, #a8c0d8)',
+              borderRadius: '16px',
+              padding: 4,
+              textAlign: 'center',
+              boxShadow: '0px 5px 15px rgba(0,0,0,0.15)',
+            },
+          }}
+        >
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <CheckCircleOutlineIcon sx={{ fontSize: 60, color: '#2e3b55', mb: 2 }} />
+            <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1, color: '#2e3b55' }}>
+              Multa Registrada
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 3, color: '#2e3b55' }}>
+              La multa se registró con éxito.
+            </Typography>
+            <Button
+              onClick={handleCloseModal}
+              variant="contained"
+              sx={{
+                backgroundColor: '#2e3b55',
+                color: 'white',
+                textTransform: 'none',
+                fontWeight: 'bold',
+                borderRadius: '8px',
+                px: 4,
+                '&:hover': { backgroundColor: '#1c313a' },
+              }}
+            >
+              Cerrar
+            </Button>
+          </Box>
+        </Dialog>
+      </CSSTransition>
     </>
   );
 };
 
 export default Montos;
+ 

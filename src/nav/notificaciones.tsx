@@ -7,33 +7,40 @@ const Notificationes: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) {
-      navigate("/login");
-      return;
-    }
-
-    const fetchNotifications = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:4000/api/notifications/${userId}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Error al obtener notificaciones");
-        }
-
-        const data = await response.json();
-        setNotifications(data);
-      } catch (error) {
-        console.error("Error al cargar las notificaciones:", error);
-      } finally {
-        setLoading(false);
+  const fetchNotifications = async () => {
+    try {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        navigate("/login");
+        return;
       }
-    };
 
+      const response = await fetch(
+        `http://localhost:4000/api/notifications/${userId}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al obtener notificaciones");
+      }
+
+      const data = await response.json();
+      setNotifications(data);
+    } catch (error) {
+      console.error("Error al cargar las notificaciones:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Llamar a fetchNotifications inmediatamente al cargar el componente
     fetchNotifications();
+
+    // Configurar un intervalo para llamar a fetchNotifications cada 60 segundos (60000 ms)
+    const intervalId = setInterval(fetchNotifications, 1000);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(intervalId);
   }, [navigate]);
 
   const handleNotificationRead = async (notificationId: string) => {
@@ -70,53 +77,53 @@ const Notificationes: React.FC = () => {
   return (
     <>
       <Navbar />
-    <div className="container mx-auto py-6 px-4">
-      <h1 className="text-2xl font-bold mb-4">Notificaciones</h1>
-      {notifications.length === 0 ? (
-        <p>No tienes notificaciones.</p>
-      ) : (
-        <ul className="space-y-4">
-          {notifications.map((notification) => (
-            <li
-              key={notification._id}
-              className={`p-4 border rounded-lg ${
-                notification.isRead ? "bg-gray-100" : "bg-white"
-              }`}
-            >
-              <p className="font-bold">{notification.message}</p>
-              {notification.montoId && (
-                <>
-                  <p>
-                    <span className="font-semibold">Descripción: </span>
-                    {notification.montoId.description}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Monto: </span>$
-                    {notification.montoId.amount}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Fecha: </span>
-                    {new Date(notification.montoId.date).toLocaleDateString()}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Departamento: </span>
-                    {notification.montoId.department}
-                  </p>
-                </>
-              )}
-              {!notification.isRead && (
-                <button
-                  onClick={() => handleNotificationRead(notification._id)}
-                  className="mt-2 text-blue-500"
-                >
-                  Marcar como leída
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+      <div className="container mx-auto py-6 px-4">
+        <h1 className="text-2xl font-bold mb-4">Notificaciones</h1>
+        {notifications.length === 0 ? (
+          <p>No tienes notificaciones.</p>
+        ) : (
+          <ul className="space-y-4">
+            {notifications.map((notification) => (
+              <li
+                key={notification._id}
+                className={`p-4 border rounded-lg ${
+                  notification.isRead ? "bg-gray-100" : "bg-white"
+                }`}
+              >
+                <p className="font-bold">{notification.message}</p>
+                {notification.montoId && (
+                  <>
+                    <p>
+                      <span className="font-semibold">Descripción: </span>
+                      {notification.montoId.description}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Monto: </span>$
+                      {notification.montoId.amount}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Fecha: </span>
+                      {new Date(notification.montoId.date).toLocaleDateString()}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Departamento: </span>
+                      {notification.montoId.department}
+                    </p>
+                  </>
+                )}
+                {!notification.isRead && (
+                  <button
+                    onClick={() => handleNotificationRead(notification._id)}
+                    className="mt-2 text-blue-500"
+                  >
+                    Marcar como leída
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </>
   );
 };
