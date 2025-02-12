@@ -115,7 +115,7 @@ const Navbar: React.FC = () => {
       setTimeout(() => {
         setIsLoggingOut(false);
         setIsLoggedOut(true);     
-        setTimeout(() => {
+        setTimeout(() => {  
           navigate("/login");
         }, 2000);
       }, 2000);
