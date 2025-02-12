@@ -17,7 +17,7 @@ const Crud: React.FC = () => {
 
   const fetchFineRecords = async () => {
     try {
-      const response = await fetch('https://apireact-evp2.onrender.com/api/montos/mostrar');
+      const response = await fetch('http://localhost:4000/api/montos/mostrar');
       const data = await response.json();
       setFineRecords(data);
     } catch (error) {
