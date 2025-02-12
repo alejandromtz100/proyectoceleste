@@ -36,7 +36,7 @@ const Navbar: React.FC = () => {
         }
 
         const response = await fetch(
-          `http://localhost:4000/api/users/me/${userId}`,
+          `https://apireact-evp2.onrender.com/api/users/me/${userId}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -68,7 +68,7 @@ const Navbar: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:4000/api/notifications/${userId}`
+        `https://apireact-evp2.onrender.com/api/notifications/${userId}`
       );
 
       if (!response.ok) {
@@ -94,7 +94,7 @@ const Navbar: React.FC = () => {
     setIsLoggingOut(true);
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch("http://localhost:4000/api/users/logout", {
+      const response = await fetch("https://apireact-evp2.onrender.com/api/users/logout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -129,7 +129,7 @@ const Navbar: React.FC = () => {
   const handleNotificationRead = async (notificationId: string) => {
     try {
       const response = await fetch(
-        `http://localhost:4000/api/notifications/${notificationId}`,
+        `https://apireact-evp2.onrender.com/api/notifications/${notificationId}`,
         {
           method: "PUT",
           headers: {
