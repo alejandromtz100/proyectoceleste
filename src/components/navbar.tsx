@@ -109,7 +109,7 @@ const Navbar: React.FC = () => {
       // Elimina los datos de autenticación del localStorage
       localStorage.removeItem("userId");
       localStorage.removeItem("token");
-      localStorage.removeItem("role");
+      localStorage.removeItem("role"); 
 
       // Simula un tiempo de espera para la animación
       setTimeout(() => {
