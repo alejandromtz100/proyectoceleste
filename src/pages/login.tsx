@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import fondo from '../assets/fondo.png';
-import '../css/Login.css'; // Archivo CSS para las animaciones
+import '../css/Login.css';
 
-const Login: React.FC = () => {
+interface LoginProps {
+  onLogin: (phone: string, password: string) => void;
+}
+
+const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,6 +26,9 @@ const Login: React.FC = () => {
     setError('');
     setIsLoading(true);
 
+    // Call the onLogin callback (if needed)
+    onLogin(phone, password);
+
     try {
       const response = await fetch('http://localhost:4000/api/users/login', {
         method: 'POST',
@@ -37,14 +44,14 @@ const Login: React.FC = () => {
         throw new Error(data.message || 'Error al iniciar sesión');
       }
 
-      // Almacenar el token, rol e id en el localStorage
+      // Store token, role, and user id in localStorage
       localStorage.setItem('token', data.token);
       localStorage.setItem('role', data.user.role);
       localStorage.setItem('userId', data.user._id);
 
       console.log('Inicio de sesión exitoso:', data);
 
-      // Simular tiempos de espera para animación y redirección
+      // Simulate loading and success animation delays before redirection
       setTimeout(() => {
         setIsLoading(false);
         setIsSuccess(true);
@@ -54,8 +61,8 @@ const Login: React.FC = () => {
           } else if (data.user.role === 'admin') {
             navigate('/inicioadmin');
           }
-        }, 2000); // Redirige después de 2 segundos
-      }, 2000); // Simula 2 segundos de carga
+        }, 2000);
+      }, 2000);
     } catch (err: any) {
       setIsLoading(false);
       setError(err.message);
@@ -122,7 +129,6 @@ const Login: React.FC = () => {
         </p>
       </div>
 
-      {/* Animación de carga y éxito */}
       {(isLoading || isSuccess) && (
         <div className="loading-animation active">
           {isLoading && (
@@ -144,5 +150,3 @@ const Login: React.FC = () => {
 };
 
 export default Login;
-  
-
