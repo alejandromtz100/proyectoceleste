@@ -3,11 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import fondo from '../assets/fondo.png';
 import '../css/Login.css'; // Archivo CSS para las animaciones
 
-interface LoginProps {
-  onLogin: (phone: string, password: string) => void;
-}
-
-const Login: React.FC<LoginProps> = ({}) => {
+const Login: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -41,24 +37,25 @@ const Login: React.FC<LoginProps> = ({}) => {
         throw new Error(data.message || 'Error al iniciar sesión');
       }
 
-      // Guardar el rol y el id en el localStorage
+      // Almacenar el token, rol e id en el localStorage
+      localStorage.setItem('token', data.token);
       localStorage.setItem('role', data.user.role);
       localStorage.setItem('userId', data.user._id);
 
       console.log('Inicio de sesión exitoso:', data);
 
-      // Simular un tiempo de espera para la animación
+      // Simular tiempos de espera para animación y redirección
       setTimeout(() => {
         setIsLoading(false);
-        setIsSuccess(true); // Mostrar mensaje de éxito
+        setIsSuccess(true);
         setTimeout(() => {
           if (data.user.role === 'user') {
             navigate('/Dashboard');
           } else if (data.user.role === 'admin') {
             navigate('/inicioadmin');
           }
-        }, 2000); // Redirigir después de 2 segundos
-      }, 2000); // Simular un tiempo de carga de 2 segundos
+        }, 2000); // Redirige después de 2 segundos
+      }, 2000); // Simula 2 segundos de carga
     } catch (err: any) {
       setIsLoading(false);
       setError(err.message);
@@ -125,23 +122,23 @@ const Login: React.FC<LoginProps> = ({}) => {
         </p>
       </div>
 
-      {/* Animación de carga */}
-{(isLoading || isSuccess) && (
-  <div className="loading-animation active">
-    {isLoading && (
-      <>
-        <div className="spinner"></div>
-        <p className="loading-text">Cargando...</p>
-      </>
-    )}
-    {isSuccess && (
-      <>
-        <div className="checkmark"></div>
-        <p className="success-message active">Inicio de sesión exitoso</p>
-      </>
-    )}
-  </div>
-)}
+      {/* Animación de carga y éxito */}
+      {(isLoading || isSuccess) && (
+        <div className="loading-animation active">
+          {isLoading && (
+            <>
+              <div className="spinner"></div>
+              <p className="loading-text">Cargando...</p>
+            </>
+          )}
+          {isSuccess && (
+            <>
+              <div className="checkmark"></div>
+              <p className="success-message active">Inicio de sesión exitoso</p>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };

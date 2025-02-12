@@ -24,17 +24,25 @@ const Navbar: React.FC = () => {
   const [isLoggedOut, setIsLoggedOut] = useState(false); // Estado para el mensaje de éxito
   const navigate = useNavigate();
 
+  // Obtención de datos del usuario usando el endpoint /me/:id y enviando el token en los headers
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const userId = localStorage.getItem("userId");
-        if (!userId) {
+        const token = localStorage.getItem("token");
+        if (!userId || !token) {
           navigate("/login");
           return;
         }
 
         const response = await fetch(
-          `http://localhost:4000/api/users/me${userId}`
+          `http://localhost:4000/api/users/me/${userId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": token,
+            },
+          }
         );
 
         if (!response.ok) {
@@ -53,6 +61,7 @@ const Navbar: React.FC = () => {
     fetchUserData();
   }, [navigate]);
 
+  // Función para obtener notificaciones (se mantiene igual)
   const fetchNotifications = async () => {
     const userId = localStorage.getItem("userId");
     if (!userId) return;
@@ -77,18 +86,19 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 10000);
-
     return () => clearInterval(interval);
   }, []);
 
+  // Función para cerrar sesión, enviando el token en el header y eliminando los datos de autenticación del localStorage
   const handleLogout = async () => {
-    setIsLoggingOut(true); // Mostrar animación de "Cerrando sesión..."
-
+    setIsLoggingOut(true);
+    const token = localStorage.getItem("token");
     try {
       const response = await fetch("http://localhost:4000/api/users/logout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": token || "",
         },
       });
 
@@ -96,22 +106,26 @@ const Navbar: React.FC = () => {
         throw new Error("Error al cerrar sesión");
       }
 
+      // Elimina los datos de autenticación del localStorage
       localStorage.removeItem("userId");
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
 
-      // Simular un tiempo de espera para la animación
+      // Simula un tiempo de espera para la animación
       setTimeout(() => {
         setIsLoggingOut(false);
-        setIsLoggedOut(true); // Mostrar mensaje de "Sesión cerrada"
+        setIsLoggedOut(true);
         setTimeout(() => {
           navigate("/login");
-        }, 2000); // Redirigir después de 2 segundos
-      }, 2000); // Simular un tiempo de carga de 2 segundos
+        }, 2000);
+      }, 2000);
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       setIsLoggingOut(false);
     }
   };
 
+  // Función para marcar una notificación como leída
   const handleNotificationRead = async (notificationId: string) => {
     try {
       const response = await fetch(
@@ -158,61 +172,61 @@ const Navbar: React.FC = () => {
         </div>
 
         <ul className="hidden md:flex space-x-8 text-lg">
-  {role === "user" && (
-    <>
-      <li className="flex items-center space-x-2">
-        <FaHome /> {/* Ícono de Home */}
-        <a href="/Dashboard" className="hover:text-yellow-300 transition">
-          Home
-        </a>
-      </li>
-      <li className="flex items-center space-x-2">
-        <FaMoneyBillAlt />
-        <a href="/pagos" className="hover:text-yellow-300 transition">
-          Pagos
-        </a>
-      </li>
-      <li className="flex items-center space-x-2">
-        <FaKey />
-        <a href="/permisos" className="hover:text-yellow-300 transition">
-          Permisos
-        </a>
-      </li>
-      <li className="flex items-center space-x-2">
-        <FaBuilding />
-        <a href="/condominios" className="hover:text-yellow-300 transition">
-          Condominios
-        </a>
-      </li>
-    </>
-  )}
+          {role === "user" && (
+            <>
+              <li className="flex items-center space-x-2">
+                <FaHome />
+                <a href="/Dashboard" className="hover:text-yellow-300 transition">
+                  Home
+                </a>
+              </li>
+              <li className="flex items-center space-x-2">
+                <FaMoneyBillAlt />
+                <a href="/pagos" className="hover:text-yellow-300 transition">
+                  Pagos
+                </a>
+              </li>
+              <li className="flex items-center space-x-2">
+                <FaKey />
+                <a href="/permisos" className="hover:text-yellow-300 transition">
+                  Permisos
+                </a>
+              </li>
+              <li className="flex items-center space-x-2">
+                <FaBuilding />
+                <a href="/condominios" className="hover:text-yellow-300 transition">
+                  Condominios
+                </a>
+              </li>
+            </>
+          )}
 
-  {role === "admin" && (
-    <>
-      <li className="flex items-center space-x-2">
-        <FaHome /> {/* Ícono de Home */}
-        <a href="/inicioadmin" className="hover:text-yellow-300 transition">
-          Home
-        </a>
-      </li>
-      <li className="flex items-center space-x-2">
-        <FaClipboardList />
-        <a href="/crud" className="hover:text-yellow-300 transition">
-          Registros
-        </a>
-      </li>
-      <li className="flex items-center space-x-2">
-        <FaChartLine />
-        <a href="/montos" className="hover:text-yellow-300 transition">
-          Multas
-        </a>
-      </li>
-    </>
-  )}
-</ul>
+          {role === "admin" && (
+            <>
+              <li className="flex items-center space-x-2">
+                <FaHome />
+                <a href="/inicioadmin" className="hover:text-yellow-300 transition">
+                  Home
+                </a>
+              </li>
+              <li className="flex items-center space-x-2">
+                <FaClipboardList />
+                <a href="/crud" className="hover:text-yellow-300 transition">
+                  Registros
+                </a>
+              </li>
+              <li className="flex items-center space-x-2">
+                <FaChartLine />
+                <a href="/montos" className="hover:text-yellow-300 transition">
+                  Multas
+                </a>
+              </li>
+            </>
+          )}
+        </ul>
 
         <div className="flex items-center space-x-6">
-          {/* Notifications */}
+          {/* Notificaciones */}
           <div className="relative">
             <button
               className="relative flex items-center space-x-2 focus:outline-none"
@@ -337,7 +351,7 @@ const Navbar: React.FC = () => {
             )}
             {isLoggedOut && (
               <>
-                <FaSignOutAlt className="logout-icon" /> {/* Ícono de cerrar sesión */}
+                <FaSignOutAlt className="logout-icon" />
                 <p className="success-message active">Sesión cerrada</p>
               </>
             )}
