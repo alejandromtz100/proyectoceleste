@@ -114,7 +114,7 @@ const Navbar: React.FC = () => {
       // Simula un tiempo de espera para la animación
       setTimeout(() => {
         setIsLoggingOut(false);
-        setIsLoggedOut(true);
+        setIsLoggedOut(true);     
         setTimeout(() => {
           navigate("/login");
         }, 2000);
