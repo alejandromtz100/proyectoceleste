@@ -26,8 +26,8 @@ const Montos: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  // Estado para controlar el tiempo de debounce
-  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  // Use ReturnType<typeof setTimeout> instead of NodeJS.Timeout
+  const [typingTimeout, setTypingTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -36,7 +36,6 @@ const Montos: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Función para buscar el usuario por nombre y actualizar los campos de departamento y torre
   const fetchUserData = async (userName: string) => {
     if (userName.trim() !== "") {
       try {
@@ -56,22 +55,18 @@ const Montos: React.FC = () => {
     }
   };
 
-  // useEffect para hacer el debounce y llamar a fetchUserData cada vez que se modifica el nombre
   useEffect(() => {
     if (typingTimeout) {
       clearTimeout(typingTimeout);
     }
-    // Si el campo "name" tiene contenido, se establece un retardo de 500ms para llamar a la función de búsqueda
     if (formData.name.trim() !== "") {
       const timeout = setTimeout(() => {
         fetchUserData(formData.name);
       }, 500);
       setTypingTimeout(timeout);
     } else {
-      // Si se borra el nombre, también se limpian los campos de departamento y torre
       setFormData((prev) => ({ ...prev, department: '', tower: '' }));
     }
-    // Cleanup: se limpia el timeout en cada cambio
     return () => {
       if (typingTimeout) clearTimeout(typingTimeout);
     };
@@ -97,7 +92,6 @@ const Montos: React.FC = () => {
       const data = await response.json();
       console.log('Respuesta del servidor:', data);
 
-      // Simula un retardo para visualizar la animación de carga
       setTimeout(() => {
         setShowModal(true);
         setFormData({
@@ -164,7 +158,6 @@ const Montos: React.FC = () => {
             }}
           >
             <Grid container spacing={2}>
-              {/* Primera fila: Nombre y Monto */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -188,8 +181,6 @@ const Montos: React.FC = () => {
                   required
                 />
               </Grid>
-
-              {/* Segunda fila: Descripción */}
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -203,8 +194,6 @@ const Montos: React.FC = () => {
                   required
                 />
               </Grid>
-
-              {/* Tercera fila: Fecha y Departamento */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
@@ -229,8 +218,6 @@ const Montos: React.FC = () => {
                   required
                 />
               </Grid>
-
-              {/* Cuarta fila: Torre */}
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -242,8 +229,6 @@ const Montos: React.FC = () => {
                   required
                 />
               </Grid>
-
-              {/* Botón de envío */}
               <Grid item xs={12}>
                 <Button
                   type="submit"
@@ -284,8 +269,6 @@ const Montos: React.FC = () => {
           )}
         </Paper>
       </Box>
-
-      {/* Modal */}
       <CSSTransition in={showModal} timeout={300} classNames="modal" unmountOnExit>
         <Dialog
           open={showModal}
@@ -331,4 +314,3 @@ const Montos: React.FC = () => {
 };
 
 export default Montos;
- 
