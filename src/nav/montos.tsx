@@ -10,7 +10,6 @@ import {
   Grid,
 } from '@mui/material';
 import { CSSTransition } from 'react-transition-group';
-import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbar';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import '../css/Montos.css';
@@ -26,10 +25,9 @@ const Montos: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  // Usamos ReturnType<typeof setTimeout> para tipar el timeout
-  const [typingTimeout, setTypingTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
-  const navigate = useNavigate();
+  // Use ReturnType<typeof setTimeout> instead of NodeJS.Timeout
+  const [typingTimeout, setTypingTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -41,25 +39,9 @@ const Montos: React.FC = () => {
   const fetchUserData = async (userName: string) => {
     if (userName.trim() !== "") {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          console.error("Token no encontrado. Por favor inicia sesión.");
-          navigate("/login");
-          return;
-        }
-
-        const response = await fetch(
-          `https://apireact-1-88m9.onrender.com/api/users/search?name=${userName}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`,
-            },
-          }
-        );
-
+        const response = await fetch(`https://apireact-1-88m9.onrender.com/api/users/search?name=${userName}`);
         if (!response.ok) {
-          throw new Error("Error al obtener el usuario");
+          throw new Error('Error al obtener el usuario');
         }
         const foundUser = await response.json();
         setFormData((prev) => ({
@@ -68,7 +50,7 @@ const Montos: React.FC = () => {
           tower: foundUser.tower,
         }));
       } catch (error) {
-        console.error("Error al buscar el usuario por nombre", error);
+        console.error('Error al buscar el usuario por nombre', error);
       }
     }
   };
@@ -95,32 +77,20 @@ const Montos: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("Token no encontrado. Por favor inicia sesión.");
-        navigate("/login");
-        setIsSubmitting(false);
-        return;
-      }
-
-      const response = await fetch(
-        "https://apireact-1-88m9.onrender.com/api/montos/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch('https://apireact-1-88m9.onrender.com/api/montos/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
       if (!response.ok) {
-        throw new Error("Error al registrar la multa.");
+        throw new Error('Error al registrar la multa.');
       }
 
       const data = await response.json();
-      console.log("Respuesta del servidor:", data);
+      console.log('Respuesta del servidor:', data);
 
       setTimeout(() => {
         setShowModal(true);
@@ -135,7 +105,7 @@ const Montos: React.FC = () => {
         setIsSubmitting(false);
       }, 2000);
     } catch (error) {
-      console.error("Ocurrió un error al enviar el formulario.", error);
+      console.error('Ocurrió un error al enviar el formulario.', error);
       setIsSubmitting(false);
     }
   };
@@ -150,22 +120,22 @@ const Montos: React.FC = () => {
       <Box
         sx={{
           padding: 4,
-          backgroundColor: "#f5f5f5",
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          backgroundColor: '#f5f5f5',
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <Paper
           elevation={6}
           sx={{
-            maxWidth: "800px",
-            width: "100%",
+            maxWidth: '800px',
+            width: '100%',
             padding: 4,
-            borderRadius: "16px",
-            position: "relative",
-            background: "#ffffff",
+            borderRadius: '16px',
+            position: 'relative',
+            background: '#ffffff',
           }}
         >
           <Typography
@@ -173,9 +143,9 @@ const Montos: React.FC = () => {
             gutterBottom
             align="center"
             sx={{
-              fontWeight: "bold",
+              fontWeight: 'bold',
               marginBottom: 3,
-              color: "#37474f",
+              color: '#37474f',
             }}
           >
             Registro de Multa
@@ -184,7 +154,7 @@ const Montos: React.FC = () => {
             onSubmit={handleSubmit}
             style={{
               opacity: isSubmitting ? 0.5 : 1,
-              pointerEvents: isSubmitting ? "none" : "auto",
+              pointerEvents: isSubmitting ? 'none' : 'auto',
             }}
           >
             <Grid container spacing={2}>
@@ -268,10 +238,10 @@ const Montos: React.FC = () => {
                   disabled={isSubmitting}
                   sx={{
                     padding: 1.5,
-                    borderRadius: "8px",
-                    textTransform: "none",
-                    fontSize: "16px",
-                    boxShadow: "0px 3px 6px rgba(0,0,0,0.16)",
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontSize: '16px',
+                    boxShadow: '0px 3px 6px rgba(0,0,0,0.16)',
                   }}
                 >
                   Registrar
@@ -282,16 +252,16 @@ const Montos: React.FC = () => {
           {isSubmitting && (
             <Box
               sx={{
-                position: "absolute",
+                position: 'absolute',
                 top: 0,
                 left: 0,
-                width: "100%",
-                height: "100%",
-                backgroundColor: "rgba(255, 255, 255, 0.8)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: "16px",
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '16px',
               }}
             >
               <CircularProgress size={50} />
@@ -305,33 +275,33 @@ const Montos: React.FC = () => {
           onClose={handleCloseModal}
           PaperProps={{
             sx: {
-              background: "linear-gradient(135deg, #d0e8f2, #a8c0d8)",
-              borderRadius: "16px",
+              background: 'linear-gradient(135deg, #d0e8f2, #a8c0d8)',
+              borderRadius: '16px',
               padding: 4,
-              textAlign: "center",
-              boxShadow: "0px 5px 15px rgba(0,0,0,0.15)",
+              textAlign: 'center',
+              boxShadow: '0px 5px 15px rgba(0,0,0,0.15)',
             },
           }}
         >
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <CheckCircleOutlineIcon sx={{ fontSize: 60, color: "#2e3b55", mb: 2 }} />
-            <Typography variant="h5" sx={{ fontWeight: "bold", mb: 1, color: "#2e3b55" }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <CheckCircleOutlineIcon sx={{ fontSize: 60, color: '#2e3b55', mb: 2 }} />
+            <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1, color: '#2e3b55' }}>
               Multa Registrada
             </Typography>
-            <Typography variant="body1" sx={{ mb: 3, color: "#2e3b55" }}>
+            <Typography variant="body1" sx={{ mb: 3, color: '#2e3b55' }}>
               La multa se registró con éxito.
             </Typography>
             <Button
               onClick={handleCloseModal}
               variant="contained"
               sx={{
-                backgroundColor: "#2e3b55",
-                color: "white",
-                textTransform: "none",
-                fontWeight: "bold",
-                borderRadius: "8px",
+                backgroundColor: '#2e3b55',
+                color: 'white',
+                textTransform: 'none',
+                fontWeight: 'bold',
+                borderRadius: '8px',
                 px: 4,
-                "&:hover": { backgroundColor: "#1c313a" },
+                '&:hover': { backgroundColor: '#1c313a' },
               }}
             >
               Cerrar

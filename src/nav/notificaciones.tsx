@@ -10,21 +10,13 @@ const Notificationes: React.FC = () => {
   const fetchNotifications = async () => {
     try {
       const userId = localStorage.getItem("userId");
-      const token = localStorage.getItem("token");
-
-      if (!userId || !token) {
+      if (!userId) {
         navigate("/login");
         return;
       }
 
       const response = await fetch(
-        `https://apireact-1-88m9.onrender.com/api/notifications/${userId}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          }
-        }
+        `https://apireact-1-88m9.onrender.com/api/notifications/${userId}`
       );
 
       if (!response.ok) {
@@ -41,31 +33,24 @@ const Notificationes: React.FC = () => {
   };
 
   useEffect(() => {
-    // Llamamos a fetchNotifications al cargar el componente
+    // Llamar a fetchNotifications inmediatamente al cargar el componente
     fetchNotifications();
 
-    // Configuramos un intervalo para llamar a fetchNotifications cada 60 segundos
-    const intervalId = setInterval(fetchNotifications, 60000);
+    // Configurar un intervalo para llamar a fetchNotifications cada 60 segundos (60000 ms)
+    const intervalId = setInterval(fetchNotifications, 1000);
 
-    // Limpiamos el intervalo cuando el componente se desmonte
+    // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
   }, [navigate]);
 
   const handleNotificationRead = async (notificationId: string) => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        navigate("/login");
-        return;
-      }
-      
       const response = await fetch(
         `https://apireact-1-88m9.onrender.com/api/notifications/${notificationId}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify({ isRead: true }),
         }
