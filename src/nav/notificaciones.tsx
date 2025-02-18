@@ -16,7 +16,7 @@ const Notificationes: React.FC = () => {
       }
 
       const response = await fetch(
-        `http://localhost:4000/api/notifications/${userId}`
+        `https://apireact-1-88m9.onrender.com/api/notifications/${userId}`
       );
 
       if (!response.ok) {
@@ -46,7 +46,7 @@ const Notificationes: React.FC = () => {
   const handleNotificationRead = async (notificationId: string) => {
     try {
       const response = await fetch(
-        `http://localhost:4000/api/notifications/${notificationId}`,
+        `https://apireact-1-88m9.onrender.com/api/notifications/${notificationId}`,
         {
           method: "PUT",
           headers: {

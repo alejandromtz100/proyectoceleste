@@ -39,7 +39,7 @@ const Montos: React.FC = () => {
   const fetchUserData = async (userName: string) => {
     if (userName.trim() !== "") {
       try {
-        const response = await fetch(`http://localhost:4000/api/users/search?name=${userName}`);
+        const response = await fetch(`https://apireact-1-88m9.onrender.com/api/users/search?name=${userName}`);
         if (!response.ok) {
           throw new Error('Error al obtener el usuario');
         }
@@ -77,7 +77,7 @@ const Montos: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:4000/api/montos/register', {
+      const response = await fetch('https://apireact-1-88m9.onrender.com/api/montos/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
