@@ -40,7 +40,7 @@ const Navbar: React.FC = () => {
           {
             headers: {
               "Content-Type": "application/json",
-              "Authorization": token,
+              "Authorization": `Bearer ${token}`,
             },
           }
         );
@@ -61,14 +61,21 @@ const Navbar: React.FC = () => {
     fetchUserData();
   }, [navigate]);
 
-  // Función para obtener notificaciones (se mantiene igual)
+  // Función para obtener notificaciones
   const fetchNotifications = async () => {
     const userId = localStorage.getItem("userId");
-    if (!userId) return;
+    const token = localStorage.getItem("token");
+    if (!userId || !token) return;
 
     try {
       const response = await fetch(
-        `https://apireact-1-88m9.onrender.com/api/notifications/${userId}`
+        `https://apireact-1-88m9.onrender.com/api/notifications/${userId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        }
       );
 
       if (!response.ok) {
@@ -98,7 +105,7 @@ const Navbar: React.FC = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": token || "",
+          "Authorization": `Bearer ${token}`,
         },
       });
 
@@ -127,13 +134,15 @@ const Navbar: React.FC = () => {
 
   // Función para marcar una notificación como leída
   const handleNotificationRead = async (notificationId: string) => {
+    const token = localStorage.getItem("token");
     try {
       const response = await fetch(
-        `https://apireact-1-88m9.onrender.com/api/notificati0ons/${notificationId}`,
+        `https://apireact-1-88m9.onrender.com/api/notifications/${notificationId}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
           },
           body: JSON.stringify({ isRead: true }),
         }

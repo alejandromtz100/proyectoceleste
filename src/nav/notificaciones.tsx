@@ -9,20 +9,26 @@ const Notificationes: React.FC = () => {
 
   const fetchNotifications = async () => {
     try {
+      const token = localStorage.getItem("token");
       const userId = localStorage.getItem("userId");
       if (!userId) {
         navigate("/login");
         return;
       }
-
+  
       const response = await fetch(
-        `https://apireact-1-88m9.onrender.com/api/notifications/${userId}`
+        `https://apireact-1-88m9.onrender.com/api/notifications/${userId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
       );
-
+  
       if (!response.ok) {
         throw new Error("Error al obtener notificaciones");
       }
-
+  
       const data = await response.json();
       setNotifications(data);
     } catch (error) {
@@ -31,6 +37,7 @@ const Notificationes: React.FC = () => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     // Llamar a fetchNotifications inmediatamente al cargar el componente
@@ -45,21 +52,23 @@ const Notificationes: React.FC = () => {
 
   const handleNotificationRead = async (notificationId: string) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await fetch(
         `https://apireact-1-88m9.onrender.com/api/notifications/${notificationId}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify({ isRead: true }),
         }
       );
-
+  
       if (!response.ok) {
         throw new Error("Error al marcar notificación como leída");
       }
-
+  
       setNotifications((prev) =>
         prev.map((n) =>
           n._id === notificationId ? { ...n, isRead: true } : n
@@ -69,7 +78,7 @@ const Notificationes: React.FC = () => {
       console.error("Error al marcar notificación como leída:", error);
     }
   };
-
+  
   if (loading) {
     return <div className="text-center py-10">Cargando notificaciones...</div>;
   }
