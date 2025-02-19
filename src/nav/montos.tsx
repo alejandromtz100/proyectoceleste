@@ -75,25 +75,23 @@ const Montos: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-  
+
     try {
-      const token = localStorage.getItem("token"); // Asumiendo que el token se guarda aquí
       const response = await fetch('https://apireact-1-88m9.onrender.com/api/montos/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`  // Se envía el token en la cabecera
         },
         body: JSON.stringify(formData),
       });
-  
+
       if (!response.ok) {
         throw new Error('Error al registrar la multa.');
       }
-  
+
       const data = await response.json();
       console.log('Respuesta del servidor:', data);
-  
+
       setTimeout(() => {
         setShowModal(true);
         setFormData({
@@ -111,7 +109,6 @@ const Montos: React.FC = () => {
       setIsSubmitting(false);
     }
   };
-  
 
   const handleCloseModal = () => {
     setShowModal(false);
