@@ -10,6 +10,7 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false); // Nuevo estado para recordar
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -35,7 +36,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ phoneNumber: phone, password }),
+        body: JSON.stringify({ phoneNumber: phone, password, rememberMe }), // Enviar rememberMe al backend
       });
 
       const data = await response.json();
@@ -113,6 +114,17 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               className="w-full px-4 py-2 mt-2 text-gray-700 bg-gray-100 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Ingresa tu Contraseña"
             />
+          </div>
+          <div className="mb-4">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+              />
+              <span className="ml-2 text-sm text-gray-600">Recordar en este dispositivo</span>
+            </label>
           </div>
           <button
             type="submit"
