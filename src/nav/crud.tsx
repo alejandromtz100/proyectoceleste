@@ -75,7 +75,7 @@ const Crud: React.FC = () => {
   // Se asume que existe un endpoint GET /api/users que retorna la lista de usuarios
   const fetchUserRecords = async () => {
     try {
-      const response = await fetch('/api/users');
+      const response = await fetch('https://apireact-1-88m9.onrender.com/api/users');
       const data = await response.json();
       setUserRecords(data);
     } catch (error) {
@@ -398,7 +398,7 @@ const Crud: React.FC = () => {
 
   const handleEditUserSubmit = async () => {
     try {
-      const response = await fetch(`/api/users/${currentUser._id}`, {
+      const response = await fetch(`https://apireact-1-88m9.onrender.com/api/users/${currentUser._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm),
@@ -427,7 +427,7 @@ const Crud: React.FC = () => {
 
   const handleRegisterSubmit = async () => {
     try {
-      const response = await fetch('/api/users/register', {
+      const response = await fetch('https://apireact-1-88m9.onrender.com//api/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(registerForm),
