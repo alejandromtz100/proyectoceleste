@@ -40,6 +40,17 @@ const Crud: React.FC = () => {
     password: '', // campo opcional para actualizar la contraseña
   });
 
+  // Estados para el registro de nuevos usuarios
+  const [openRegisterDialog, setOpenRegisterDialog] = useState(false);
+  const [registerForm, setRegisterForm] = useState({
+    name: '',
+    phoneNumber: '',
+    department: '',
+    tower: '',
+    role: '',
+    password: '',
+  });
+
   useEffect(() => {
     if (activeTab === 1) {
       fetchFineRecords();
@@ -201,8 +212,19 @@ const Crud: React.FC = () => {
   const renderUserRecords = () => (
     <Box>
       <Typography variant="h5" gutterBottom>
-        Edición de Usuarios
+        Gestión de Usuarios
       </Typography>
+
+      {/* Botón para registrar un nuevo usuario */}
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setOpenRegisterDialog(true)}
+        >
+          Nuevo Usuario
+        </Button>
+      </Box>
 
       {/* Tabla de usuarios */}
       <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2 }}>
@@ -295,10 +317,68 @@ const Crud: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Diálogo para registrar un nuevo usuario */}
+      <Dialog open={openRegisterDialog} onClose={handleRegisterDialogClose}>
+        <DialogTitle>Registrar Nuevo Usuario</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            <TextField
+              label="Nombre"
+              name="name"
+              value={registerForm.name}
+              onChange={handleRegisterFormChange}
+              fullWidth
+            />
+            <TextField
+              label="Teléfono"
+              name="phoneNumber"
+              value={registerForm.phoneNumber}
+              onChange={handleRegisterFormChange}
+              fullWidth
+            />
+            <TextField
+              label="Departamento"
+              name="department"
+              value={registerForm.department}
+              onChange={handleRegisterFormChange}
+              fullWidth
+            />
+            <TextField
+              label="Torre"
+              name="tower"
+              value={registerForm.tower}
+              onChange={handleRegisterFormChange}
+              fullWidth
+            />
+            <TextField
+              label="Rol"
+              name="role"
+              value={registerForm.role}
+              onChange={handleRegisterFormChange}
+              fullWidth
+            />
+            <TextField
+              label="Contraseña"
+              name="password"
+              type="password"
+              value={registerForm.password}
+              onChange={handleRegisterFormChange}
+              fullWidth
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleRegisterDialogClose}>Cancelar</Button>
+          <Button onClick={handleRegisterSubmit} variant="contained">
+            Registrar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 
-  // Manejo al hacer clic en el botón de editar
+  // Funciones para el diálogo de edición
   const handleEditClick = (user: any) => {
     setCurrentUser(user);
     setEditForm({
@@ -316,7 +396,6 @@ const Crud: React.FC = () => {
     setEditForm({ ...editForm, [e.target.name]: e.target.value });
   };
 
-  // Envío del formulario de edición
   const handleEditUserSubmit = async () => {
     try {
       const response = await fetch(`/api/users/${currentUser._id}`, {
@@ -339,6 +418,42 @@ const Crud: React.FC = () => {
   const handleDialogClose = () => {
     setOpenEditDialog(false);
     setCurrentUser(null);
+  };
+
+  // Funciones para el diálogo de registro
+  const handleRegisterFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRegisterForm({ ...registerForm, [e.target.name]: e.target.value });
+  };
+
+  const handleRegisterSubmit = async () => {
+    try {
+      const response = await fetch('/api/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(registerForm),
+      });
+      if (response.ok) {
+        fetchUserRecords();
+        setOpenRegisterDialog(false);
+        // Reiniciamos el formulario
+        setRegisterForm({
+          name: '',
+          phoneNumber: '',
+          department: '',
+          tower: '',
+          role: '',
+          password: '',
+        });
+      } else {
+        console.error('Error al registrar usuario');
+      }
+    } catch (error) {
+      console.error('Error al registrar usuario:', error);
+    }
+  };
+
+  const handleRegisterDialogClose = () => {
+    setOpenRegisterDialog(false);
   };
 
   return (
