@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {FaMoneyBillAlt,FaKey,FaClipboardList,FaChartLine,FaBuilding,FaUserCircle,FaBell,FaSignOutAlt,FaHome,} from "react-icons/fa";
+import {
+  FaMoneyBillAlt,
+  FaKey,
+  FaClipboardList,
+  FaChartLine,
+  FaBuilding,
+  FaUserCircle,
+  FaBell,
+  FaSignOutAlt,
+  FaHome,
+} from "react-icons/fa";
 import "../css/Navbar.css"; // Archivo CSS para las animaciones
 
 const Navbar: React.FC = () => {
@@ -51,7 +61,7 @@ const Navbar: React.FC = () => {
     fetchUserData();
   }, [navigate]);
 
-  // Función para obtener notificaciones (se mantiene igual)
+  // Función para obtener notificaciones
   const fetchNotifications = async () => {
     const userId = localStorage.getItem("userId");
     if (!userId) return;
@@ -75,11 +85,42 @@ const Navbar: React.FC = () => {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 10000);
+    const interval = setInterval(fetchNotifications, 10000); // Actualiza notificaciones cada 10 segundos
     return () => clearInterval(interval);
   }, []);
 
-  // Función para cerrar sesión, enviando el token en el header y eliminando los datos de autenticación del localStorage
+  // Función para verificar la validez del token
+  const verifyToken = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      handleLogout();
+      return;
+    }
+
+    try {
+      const response = await fetch("https://apireact-1-88m9.onrender.com/api/users/verify-token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Token inválido");
+      }
+    } catch (error) {
+      handleLogout();
+    }
+  };
+
+  // Verifica el token cada 5 minutos
+  useEffect(() => {
+    const interval = setInterval(verifyToken, 5 * 60 * 1000); // 5 minutos
+    return () => clearInterval(interval);
+  }, []);
+
+  // Función para cerrar sesión
   const handleLogout = async () => {
     setIsLoggingOut(true);
     const token = localStorage.getItem("token");
@@ -99,13 +140,13 @@ const Navbar: React.FC = () => {
       // Elimina los datos de autenticación del localStorage
       localStorage.removeItem("userId");
       localStorage.removeItem("token");
-      localStorage.removeItem("role"); 
+      localStorage.removeItem("role");
 
       // Simula un tiempo de espera para la animación
       setTimeout(() => {
         setIsLoggingOut(false);
-        setIsLoggedOut(true);     
-        setTimeout(() => {  
+        setIsLoggedOut(true);
+        setTimeout(() => {
           navigate("/login");
         }, 2000);
       }, 2000);
@@ -119,7 +160,7 @@ const Navbar: React.FC = () => {
   const handleNotificationRead = async (notificationId: string) => {
     try {
       const response = await fetch(
-        `https://apireact-1-88m9.onrender.com/api/notificati0ons/${notificationId}`,
+        `https://apireact-1-88m9.onrender.com/api/notifications/${notificationId}`,
         {
           method: "PUT",
           headers: {
@@ -156,7 +197,7 @@ const Navbar: React.FC = () => {
     <nav className="bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-500 text-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center py-4 px-6">
         <div className="text-3xl font-extrabold cursor-pointer flex items-center space-x-3">
-          <a href="" className="hover:underline">
+          <a href="/" className="hover:underline">
             Condo<span className="text-yellow-300">Web</span>
           </a>
         </div>
