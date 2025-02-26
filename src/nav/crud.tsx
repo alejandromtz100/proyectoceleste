@@ -1,17 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Tabs, Tab, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
-import PaymentIcon from '@mui/icons-material/Payment';
+import { Tabs, Tab, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
-import GateIcon from '@mui/icons-material/LockOpen';
+import PersonIcon from '@mui/icons-material/Person';
+import EditIcon from '@mui/icons-material/Edit';
 import Navbar from '../components/navbar';
 
 const Crud: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [fineRecords, setFineRecords] = useState([]);
+  const [userRecords, setUserRecords] = useState<any[]>([]);
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    phoneNumber: '',
+    department: '',
+    tower: '',
+    password: '',
+    role: ''
+  });
 
   useEffect(() => {
-    if (activeTab === 1) {
+    if (activeTab === 0) {
       fetchFineRecords();
+    } else if (activeTab === 1) {
+      fetchUserRecords();
     }
   }, [activeTab]);
 
@@ -25,48 +38,86 @@ const Crud: React.FC = () => {
     }
   };
 
+  const fetchUserRecords = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://apireact-1-88m9.onrender.com/api/users/all', {
+        headers: {
+          'Authorization': token || '',
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Error fetching user records');
+      }
+      const data = await response.json();
+      setUserRecords(data);
+    } catch (error) {
+      console.error('Error fetching user records:', error);
+    }
+  };
+
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+  };
+
+  const handleEditOpen = (user: any) => {
+    setSelectedUser(user);
+    setEditForm({
+      name: user.name || '',
+      phoneNumber: user.phoneNumber || '',
+      department: user.department || '',
+      tower: user.tower || '',
+      password: user.password || '',
+      role: user.role || ''
+    });
+    setEditOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditForm({
+      ...editForm,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleEditSubmit = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`https://apireact-1-88m9.onrender.com/api/users/update/${selectedUser._id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token || ''
+        },
+        body: JSON.stringify(editForm)
+      });
+      if (!response.ok) {
+        throw new Error('Error updating user');
+      }
+      // Actualizamos la lista de usuarios y cerramos el modal
+      fetchUserRecords();
+      handleEditClose();
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
   };
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 0:
-        return renderPaymentRecords();
-      case 1:
         return renderFineRecords();
-      case 2:
-        return renderGatePermissions();
+      case 1:
+        return renderUserRecordsTable();
       default:
         return null;
     }
   };
-
-  const renderPaymentRecords = () => (
-    <Box>
-      <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <PaymentIcon color="primary" /> Registros de Pagos
-      </Typography>
-      <TableContainer component={Paper} sx={{ marginTop: 3, boxShadow: 3, borderRadius: 2 }}>
-        <Table>
-          <TableHead sx={{ backgroundColor: '#f0f0f0' }}>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Fecha</TableCell>
-              <TableCell>Monto</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <TableRow>
-              <TableCell>1</TableCell>
-              <TableCell>2025-01-20</TableCell>
-              <TableCell>$100</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
-  );
 
   const renderFineRecords = () => (
     <Box>
@@ -102,29 +153,104 @@ const Crud: React.FC = () => {
     </Box>
   );
 
-  const renderGatePermissions = () => (
+  const renderUserRecordsTable = () => (
     <Box>
       <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <GateIcon color="secondary" /> Permisos de Portones
+        <PersonIcon color="primary" /> Registro de Usuarios
       </Typography>
       <TableContainer component={Paper} sx={{ marginTop: 3, boxShadow: 3, borderRadius: 2 }}>
         <Table>
-          <TableHead sx={{ backgroundColor: '#e8f5e9' }}>
+          <TableHead sx={{ backgroundColor: '#e3f2fd' }}>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Usuario</TableCell>
-              <TableCell>Permiso</TableCell>
+              <TableCell>Nombre</TableCell>
+              <TableCell>Teléfono</TableCell>
+              <TableCell>Departamento</TableCell>
+              <TableCell>Torre</TableCell>
+              <TableCell>Rol</TableCell>
+              <TableCell>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            <TableRow>
-              <TableCell>1</TableCell>
-              <TableCell>Juan Pérez</TableCell>
-              <TableCell>Acceso Completo</TableCell>
-            </TableRow>
+            {userRecords.map((user: any, index: number) => (
+              <TableRow key={index}>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.phoneNumber}</TableCell>
+                <TableCell>{user.department}</TableCell>
+                <TableCell>{user.tower}</TableCell>
+                <TableCell>{user.role}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<EditIcon />}
+                    onClick={() => handleEditOpen(user)}
+                  >
+                    Editar
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Modal para edición de usuario */}
+      <Dialog open={editOpen} onClose={handleEditClose}>
+        <DialogTitle>Editar Usuario</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 1 }}>
+            <TextField
+              label="Nombre"
+              name="name"
+              value={editForm.name}
+              onChange={handleEditChange}
+              fullWidth
+            />
+            <TextField
+              label="Teléfono"
+              name="phoneNumber"
+              value={editForm.phoneNumber}
+              onChange={handleEditChange}
+              fullWidth
+            />
+            <TextField
+              label="Departamento"
+              name="department"
+              value={editForm.department}
+              onChange={handleEditChange}
+              fullWidth
+            />
+            <TextField
+              label="Torre"
+              name="tower"
+              value={editForm.tower}
+              onChange={handleEditChange}
+              fullWidth
+            />
+            <TextField
+              label="Contraseña"
+              name="password"
+              type="password"
+              value={editForm.password}
+              onChange={handleEditChange}
+              fullWidth
+            />
+            <TextField
+              label="Rol"
+              name="role"
+              value={editForm.role}
+              onChange={handleEditChange}
+              fullWidth
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleEditClose}>Cancelar</Button>
+          <Button onClick={handleEditSubmit} variant="contained" color="primary">
+            Guardar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 
@@ -143,9 +269,8 @@ const Crud: React.FC = () => {
           centered
           sx={{ marginBottom: 4 }}
         >
-          <Tab label="Registros de Pagos" />
           <Tab label="Registros de Multas" />
-          <Tab label="Permisos de Portones" />
+          <Tab label="Registro de Usuarios" />
         </Tabs>
         <Box sx={{ marginTop: 4 }}>{renderTabContent()}</Box>
       </Box>

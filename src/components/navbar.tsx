@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  FaMoneyBillAlt,
-  FaKey,
-  FaClipboardList,
-  FaChartLine,
-  FaBuilding,
-  FaUserCircle,
-  FaBell,
-  FaSignOutAlt, 
-  FaHome,
-} from "react-icons/fa";
+import {FaMoneyBillAlt,FaKey,FaClipboardList,FaChartLine,FaBuilding,FaUserCircle,FaBell,FaSignOutAlt,FaHome,} from "react-icons/fa";
 import "../css/Navbar.css"; // Archivo CSS para las animaciones
 
 const Navbar: React.FC = () => {
@@ -166,7 +156,7 @@ const Navbar: React.FC = () => {
     <nav className="bg-gradient-to-r from-teal-500 via-blue-500 to-indigo-500 text-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center py-4 px-6">
         <div className="text-3xl font-extrabold cursor-pointer flex items-center space-x-3">
-          <a href="/Dashboard" className="hover:underline">
+          <a href="" className="hover:underline">
             Condo<span className="text-yellow-300">Web</span>
           </a>
         </div>
