@@ -24,7 +24,7 @@ const Navbar: React.FC = () => {
           navigate("/login");
           return;
         }
-
+  
         const response = await fetch(
           `https://apireact-1-88m9.onrender.com/api/users/me/${userId}`,
           {
@@ -34,11 +34,11 @@ const Navbar: React.FC = () => {
             },
           }
         );
-
+  
         if (!response.ok) {
           throw new Error("Error al obtener los datos del usuario");
         }
-
+  
         const userData = await response.json();
         setRole(userData.role);
         setUserName(userData.name);
@@ -47,7 +47,7 @@ const Navbar: React.FC = () => {
         navigate("/login");
       }
     };
-
+  
     fetchUserData();
   }, [navigate]);
 
@@ -91,21 +91,21 @@ const Navbar: React.FC = () => {
           "Authorization": token || "",
         },
       });
-
+  
       if (!response.ok) {
         throw new Error("Error al cerrar sesión");
       }
-
+  
       // Elimina los datos de autenticación del localStorage
       localStorage.removeItem("userId");
       localStorage.removeItem("token");
-      localStorage.removeItem("role"); 
-
+      localStorage.removeItem("role");
+  
       // Simula un tiempo de espera para la animación
       setTimeout(() => {
         setIsLoggingOut(false);
-        setIsLoggedOut(true);     
-        setTimeout(() => {  
+        setIsLoggedOut(true);
+        setTimeout(() => {
           navigate("/login");
         }, 2000);
       }, 2000);
