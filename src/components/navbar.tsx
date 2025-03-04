@@ -24,63 +24,44 @@ const Navbar: React.FC = () => {
   const [isLoggedOut, setIsLoggedOut] = useState(false);
   const navigate = useNavigate();
 
-  // Función para verificar el estado de autenticación
-  const fetchUserData = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      const token = localStorage.getItem("token");
-      if (!userId || !token) {
-        navigate("/login");
-        return;
-      }
-
-      const response = await fetch(
-        `https://apireact-1-88m9.onrender.com/api/users/me/${userId}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": token,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (errorData.code === "TOKEN_INVALID") {
-          // Forzar cierre de sesión
-          localStorage.removeItem("userId");
-          localStorage.removeItem("token");
-          localStorage.removeItem("role");
-          navigate("/login");
+  // Obtención de datos del usuario utilizando el token
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userId = localStorage.getItem("userId");
+        const token = localStorage.getItem("token");
+        if (!userId || !token) {
+          navigate("/login"); // Redirige al usuario si no hay token o userId
           return;
         }
-        throw new Error("Error al obtener los datos del usuario");
+  
+        const response = await fetch(
+          `https://apireact-1-88m9.onrender.com/api/users/me/${userId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": token,
+            },
+          }
+        );
+  
+        if (!response.ok) {
+          throw new Error("Error al obtener los datos del usuario");
+        }
+  
+        const userData = await response.json();
+        setRole(userData.role);
+        setUserName(userData.name);
+      } catch (error) {
+        console.error("Error al cargar los datos del usuario:", error);
+        navigate("/login"); // Redirige al usuario si hay un error
       }
-
-      const userData = await response.json();
-      setRole(userData.role);
-      setUserName(userData.name);
-    } catch (error) {
-      console.error("Error al cargar los datos del usuario:", error);
-      navigate("/login");
-    }
-  };
-
-  // Verificar el estado de autenticación al cargar el componente
-  useEffect(() => {
+    };
+  
     fetchUserData();
   }, [navigate]);
 
-  // Verificar el estado de autenticación en intervalos regulares
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchUserData(); // Verificar el estado de autenticación cada 5 minutos
-    }, 5 * 60 * 1000); // Cada 5 minutos
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Función para obtener notificaciones
+  // Función para obtener notificaciones (incluye el token en los headers)
   const fetchNotifications = async () => {
     const userId = localStorage.getItem("userId");
     const token = localStorage.getItem("token");
@@ -98,15 +79,6 @@ const Navbar: React.FC = () => {
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
-        if (errorData.code === "TOKEN_INVALID") {
-          // Forzar cierre de sesión
-          localStorage.removeItem("userId");
-          localStorage.removeItem("token");
-          localStorage.removeItem("role");
-          navigate("/login");
-          return;
-        }
         throw new Error("Error al obtener notificaciones");
       }
 
@@ -120,14 +92,15 @@ const Navbar: React.FC = () => {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 10000); // Actualizar notificaciones cada 10 segundos
+    const interval = setInterval(fetchNotifications, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  // Función para cerrar sesión
+  // Función para cerrar sesión, enviando el token y eliminando datos de autenticación
   const handleLogout = async () => {
-    setIsLoggingOut(true);
+    setIsLoggingOut(true); // Mostrar animación de "Cerrando sesión..."
     const token = localStorage.getItem("token");
+  
     try {
       const response = await fetch("https://apireact-1-88m9.onrender.com/api/users/logout", {
         method: "POST",
@@ -136,27 +109,26 @@ const Navbar: React.FC = () => {
           "Authorization": token || "",
         },
       });
-
+  
       if (!response.ok) {
         throw new Error("Error al cerrar sesión");
       }
-
+  
       // Elimina los datos de autenticación del localStorage
       localStorage.removeItem("userId");
       localStorage.removeItem("token");
       localStorage.removeItem("role");
-
-      // Simula una animación de cierre de sesión
+  
+      // Cambia el estado para mostrar la animación de "Sesión cerrada"
+      setIsLoggedOut(true);
+  
+      // Redirige al usuario a la página de login después de 2 segundos
       setTimeout(() => {
-        setIsLoggingOut(false);
-        setIsLoggedOut(true);
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000);
+        navigate("/login");
       }, 2000);
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
-      setIsLoggingOut(false);
+      setIsLoggingOut(false); // Oculta la animación de "Cerrando sesión..."
     }
   };
 
@@ -164,7 +136,7 @@ const Navbar: React.FC = () => {
   const handleNotificationRead = async (notificationId: string) => {
     try {
       const response = await fetch(
-        `https://apireact-1-88m9.onrender.com/api/notifications/${notificationId}`,
+        `https://apireact-1-88m9.onrender.com/api/notificati0ons/${notificationId}`,
         {
           method: "PUT",
           headers: {
