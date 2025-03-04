@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {FaMoneyBillAlt,FaKey,FaClipboardList,FaChartLine,FaBuilding,FaUserCircle,FaBell,FaSignOutAlt,FaHome,} from "react-icons/fa";
-import "../css/Navbar.css"; // Archivo CSS para las animaciones
+import {
+  FaMoneyBillAlt,
+  FaKey,
+  FaClipboardList,
+  FaChartLine,
+  FaBuilding,
+  FaUserCircle,
+  FaBell,
+  FaSignOutAlt,
+  FaHome,
+} from "react-icons/fa";
+import "../css/Navbar.css";
 
 const Navbar: React.FC = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -10,16 +20,13 @@ const Navbar: React.FC = () => {
   const [userName, setUserName] = useState<string>("");
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<any[]>([]);
-  const [isLoggingOut, setIsLoggingOut] = useState(false); // Estado para la animación de cierre de sesión
-  const [isLoggedOut, setIsLoggedOut] = useState(false); // Estado para el mensaje de éxito
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isLoggedOut, setIsLoggedOut] = useState(false);
   const navigate = useNavigate();
 
-  // Obtención de datos del usuario usando el endpoint /me/:id y enviando el token en los headers
+  // Obtención de datos del usuario utilizando el token
   useEffect(() => {
     const fetchUserData = async () => {
-      const isTokenValid = await verifyToken();
-      if (!isTokenValid) return;
-  
       try {
         const userId = localStorage.getItem("userId");
         const token = localStorage.getItem("token");
@@ -27,7 +34,7 @@ const Navbar: React.FC = () => {
           navigate("/login");
           return;
         }
-  
+
         const response = await fetch(
           `https://apireact-1-88m9.onrender.com/api/users/me/${userId}`,
           {
@@ -37,11 +44,11 @@ const Navbar: React.FC = () => {
             },
           }
         );
-  
+
         if (!response.ok) {
           throw new Error("Error al obtener los datos del usuario");
         }
-  
+
         const userData = await response.json();
         setRole(userData.role);
         setUserName(userData.name);
@@ -50,18 +57,25 @@ const Navbar: React.FC = () => {
         navigate("/login");
       }
     };
-  
+
     fetchUserData();
   }, [navigate]);
 
-  // Función para obtener notificaciones (se mantiene igual)
+  // Función para obtener notificaciones (incluye el token en los headers)
   const fetchNotifications = async () => {
     const userId = localStorage.getItem("userId");
-    if (!userId) return;
+    const token = localStorage.getItem("token");
+    if (!userId || !token) return;
 
     try {
       const response = await fetch(
-        `https://apireact-1-88m9.onrender.com/api/notifications/${userId}`
+        `https://apireact-1-88m9.onrender.com/api/notifications/${userId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": token,
+          },
+        }
       );
 
       if (!response.ok) {
@@ -76,44 +90,13 @@ const Navbar: React.FC = () => {
     }
   };
 
-  const verifyToken = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-      return false;
-    }
-  
-    try {
-      const response = await fetch("https://apireact-1-88m9.onrender.com/api/users/verify-token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": token,
-        },
-      });
-  
-      if (!response.ok) {
-        throw new Error("Token inválido");
-      }
-  
-      return true;
-    } catch (error) {
-      console.error("Error al verificar el token:", error);
-      localStorage.removeItem("userId");
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      navigate("/login");
-      return false;
-    }
-  };
-
   useEffect(() => {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  // Función para cerrar sesión, enviando el token en el header y eliminando los datos de autenticación del localStorage
+  // Función para cerrar sesión, enviando el token y eliminando datos de autenticación
   const handleLogout = async () => {
     setIsLoggingOut(true);
     const token = localStorage.getItem("token");
@@ -125,22 +108,24 @@ const Navbar: React.FC = () => {
           "Authorization": token || "",
         },
       });
-  
+
       if (!response.ok) {
         throw new Error("Error al cerrar sesión");
       }
-  
+
+      // Elimina los datos de autenticación del localStorage
       localStorage.removeItem("userId");
       localStorage.removeItem("token");
       localStorage.removeItem("role");
-  
+
+      // Simula una animación de cierre de sesión
       setTimeout(() => {
         setIsLoggingOut(false);
         setIsLoggedOut(true);
         setTimeout(() => {
           navigate("/login");
         }, 2000);
-      }, 2000);      
+      }, 2000);
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       setIsLoggingOut(false);
@@ -166,9 +151,7 @@ const Navbar: React.FC = () => {
       }
 
       setNotifications((prev) =>
-        prev.map((n) =>
-          n._id === notificationId ? { ...n, isRead: true } : n
-        )
+        prev.map((n) => (n._id === notificationId ? { ...n, isRead: true } : n))
       );
       setUnreadCount((prev) => prev - 1);
     } catch (error) {
