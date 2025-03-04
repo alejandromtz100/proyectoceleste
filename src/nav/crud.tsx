@@ -100,6 +100,7 @@ const Crud: React.FC = () => {
       if (!response.ok) {
         throw new Error('Error updating user');
       }
+  
       // Actualizamos la lista de usuarios y cerramos el modal
       fetchUserRecords();
       handleEditClose();
