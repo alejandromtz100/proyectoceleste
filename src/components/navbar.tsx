@@ -17,6 +17,9 @@ const Navbar: React.FC = () => {
   // Obtención de datos del usuario usando el endpoint /me/:id y enviando el token en los headers
   useEffect(() => {
     const fetchUserData = async () => {
+      const isTokenValid = await verifyToken();
+      if (!isTokenValid) return;
+  
       try {
         const userId = localStorage.getItem("userId");
         const token = localStorage.getItem("token");
@@ -24,7 +27,7 @@ const Navbar: React.FC = () => {
           navigate("/login");
           return;
         }
-
+  
         const response = await fetch(
           `https://apireact-1-88m9.onrender.com/api/users/me/${userId}`,
           {
@@ -34,11 +37,11 @@ const Navbar: React.FC = () => {
             },
           }
         );
-
+  
         if (!response.ok) {
           throw new Error("Error al obtener los datos del usuario");
         }
-
+  
         const userData = await response.json();
         setRole(userData.role);
         setUserName(userData.name);
@@ -47,7 +50,7 @@ const Navbar: React.FC = () => {
         navigate("/login");
       }
     };
-
+  
     fetchUserData();
   }, [navigate]);
 
@@ -73,6 +76,37 @@ const Navbar: React.FC = () => {
     }
   };
 
+  const verifyToken = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return false;
+    }
+  
+    try {
+      const response = await fetch("https://apireact-1-88m9.onrender.com/api/users/verify-token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token,
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error("Token inválido");
+      }
+  
+      return true;
+    } catch (error) {
+      console.error("Error al verificar el token:", error);
+      localStorage.removeItem("userId");
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      navigate("/login");
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 10000);
@@ -91,21 +125,19 @@ const Navbar: React.FC = () => {
           "Authorization": token || "",
         },
       });
-
+  
       if (!response.ok) {
         throw new Error("Error al cerrar sesión");
       }
-
-      // Elimina los datos de autenticación del localStorage
+  
       localStorage.removeItem("userId");
       localStorage.removeItem("token");
-      localStorage.removeItem("role"); 
-
-      // Simula un tiempo de espera para la animación
+      localStorage.removeItem("role");
+  
       setTimeout(() => {
         setIsLoggingOut(false);
-        setIsLoggedOut(true);     
-        setTimeout(() => {  
+        setIsLoggedOut(true);
+        setTimeout(() => {
           navigate("/login");
         }, 2000);
       }, 2000);
