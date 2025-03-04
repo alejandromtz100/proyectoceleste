@@ -24,44 +24,63 @@ const Navbar: React.FC = () => {
   const [isLoggedOut, setIsLoggedOut] = useState(false);
   const navigate = useNavigate();
 
-  // Obtención de datos del usuario utilizando el token
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userId = localStorage.getItem("userId");
-        const token = localStorage.getItem("token");
-        if (!userId || !token) {
+  // Función para verificar el estado de autenticación
+  const fetchUserData = async () => {
+    try {
+      const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem("token");
+      if (!userId || !token) {
+        navigate("/login");
+        return;
+      }
+
+      const response = await fetch(
+        `https://apireact-1-88m9.onrender.com/api/users/me/${userId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": token,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.code === "TOKEN_INVALID") {
+          // Forzar cierre de sesión
+          localStorage.removeItem("userId");
+          localStorage.removeItem("token");
+          localStorage.removeItem("role");
           navigate("/login");
           return;
         }
-
-        const response = await fetch(
-          `https://apireact-1-88m9.onrender.com/api/users/me/${userId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": token,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Error al obtener los datos del usuario");
-        }
-
-        const userData = await response.json();
-        setRole(userData.role);
-        setUserName(userData.name);
-      } catch (error) {
-        console.error("Error al cargar los datos del usuario:", error);
-        navigate("/login");
+        throw new Error("Error al obtener los datos del usuario");
       }
-    };
 
+      const userData = await response.json();
+      setRole(userData.role);
+      setUserName(userData.name);
+    } catch (error) {
+      console.error("Error al cargar los datos del usuario:", error);
+      navigate("/login");
+    }
+  };
+
+  // Verificar el estado de autenticación al cargar el componente
+  useEffect(() => {
     fetchUserData();
   }, [navigate]);
 
-  // Función para obtener notificaciones (incluye el token en los headers)
+  // Verificar el estado de autenticación en intervalos regulares
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchUserData(); // Verificar el estado de autenticación cada 5 minutos
+    }, 5 * 60 * 1000); // Cada 5 minutos
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Función para obtener notificaciones
   const fetchNotifications = async () => {
     const userId = localStorage.getItem("userId");
     const token = localStorage.getItem("token");
@@ -79,6 +98,15 @@ const Navbar: React.FC = () => {
       );
 
       if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.code === "TOKEN_INVALID") {
+          // Forzar cierre de sesión
+          localStorage.removeItem("userId");
+          localStorage.removeItem("token");
+          localStorage.removeItem("role");
+          navigate("/login");
+          return;
+        }
         throw new Error("Error al obtener notificaciones");
       }
 
@@ -92,11 +120,11 @@ const Navbar: React.FC = () => {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 10000);
+    const interval = setInterval(fetchNotifications, 10000); // Actualizar notificaciones cada 10 segundos
     return () => clearInterval(interval);
   }, []);
 
-  // Función para cerrar sesión, enviando el token y eliminando datos de autenticación
+  // Función para cerrar sesión
   const handleLogout = async () => {
     setIsLoggingOut(true);
     const token = localStorage.getItem("token");
@@ -136,7 +164,7 @@ const Navbar: React.FC = () => {
   const handleNotificationRead = async (notificationId: string) => {
     try {
       const response = await fetch(
-        `https://apireact-1-88m9.onrender.com/api/notificati0ons/${notificationId}`,
+        `https://apireact-1-88m9.onrender.com/api/notifications/${notificationId}`,
         {
           method: "PUT",
           headers: {
