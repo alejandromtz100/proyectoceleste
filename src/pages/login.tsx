@@ -134,11 +134,17 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           </button>
         </form>
         <p className="mt-6 text-sm text-center text-gray-600">
-          ¿No tienes una cuenta?{' '}
-          <a href="/register" className="text-blue-500 hover:underline">
-            Regístrate
-          </a>
-        </p>
+  ¿No tienes una cuenta?{' '}
+  <a href="/register" className="text-blue-500 hover:underline">
+    Regístrate
+  </a>
+</p>
+<p className="mt-2 text-sm text-center text-gray-600">
+  ¿Olvidaste tu contraseña?{' '}
+  <a href="/reset" className="text-blue-500 hover:underline">
+    Recuperar cuenta
+  </a>
+</p>
       </div>
 
       {(isLoading || isSuccess) && (

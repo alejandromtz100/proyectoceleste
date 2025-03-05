@@ -55,9 +55,9 @@ const Navbar: React.FC = () => {
   
     fetchUserData();
   
-    // Verificar el token cada 1 minuto (60000 ms)
-const interval = setInterval(fetchUserData, 60000);
-  
+// Verificar el token cada 5 segundos (5000 ms)
+const interval = setInterval(fetchUserData, 5000);
+
     return () => clearInterval(interval);
   }, [navigate]);
 

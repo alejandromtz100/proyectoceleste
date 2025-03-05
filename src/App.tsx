@@ -10,6 +10,8 @@ import Permisos from './nav/permisos';
 import Crud from './nav/crud';
 import Inicioadmin from './admin/inicioadmin';
 import Notificaciones from './nav/notificaciones';
+import Reset from './pages/reset';
+import Restablecer from './pages/restablecer';
 
 const App: React.FC = () => {
   return (
@@ -38,6 +40,9 @@ const App: React.FC = () => {
         <Route path="/crud" element={<Crud />} />
         <Route path="/inicioadmin" element={<Inicioadmin />} />
         <Route path="/notificaciones" element={<Notificaciones />} />
+        <Route path="/reset" element={<Reset />} />
+        <Route path="/restablecer" element={<Restablecer />} />
+        
       </Routes>
     </Router>
   );
