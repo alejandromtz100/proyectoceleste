@@ -12,6 +12,7 @@ import Inicioadmin from './admin/inicioadmin';
 import Notificaciones from './nav/notificaciones';
 import Reset from './pages/reset';
 import Restablecer from './pages/restablecer';
+import ProtectedRoute from './Middleware/ProtectedRoute'; // Importar el componente ProtectedRoute
 
 const App: React.FC = () => {
   return (
@@ -29,23 +30,28 @@ const App: React.FC = () => {
         {/* Ruta para el registro */}
         <Route path="/register" element={<Register />} />
 
-        {/* Ruta para el dashboard (autenticación requerida) */}
-        <Route path="/Dashboard" element={<Dashboard />} />
+        {/* Rutas protegidas para usuarios normales */}
+        <Route element={<ProtectedRoute allowedRoles={['user']} />}>
+          <Route path="/Dashboard" element={<Dashboard />} />
+          <Route path="/pagos" element={<Pagos />} />
+          <Route path="/permisos" element={<Permisos />} />
+        </Route>
+
+        {/* Rutas protegidas para administradores */}
+        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+          <Route path="/inicioadmin" element={<Inicioadmin />} />
+          <Route path="/crud" element={<Crud />} />
+          <Route path="/montos" element={<Montos />} />
+        </Route>
 
         {/* Otras rutas de la aplicación */}
         <Route path="/navbar" element={<Navbar />} />
-        <Route path="/pagos" element={<Pagos />} />
-        <Route path="/montos" element={<Montos />} />
-        <Route path="/permisos" element={<Permisos />} />
-        <Route path="/crud" element={<Crud />} />
-        <Route path="/inicioadmin" element={<Inicioadmin />} />
         <Route path="/notificaciones" element={<Notificaciones />} />
         <Route path="/reset" element={<Reset />} />
         <Route path="/restablecer" element={<Restablecer />} />
-        
       </Routes>
     </Router>
   );
-}; 
+};
 
 export default App;
