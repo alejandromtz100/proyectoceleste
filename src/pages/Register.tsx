@@ -6,6 +6,7 @@ import '../css/Login.css'; // Se reutiliza el CSS del Login para las animaciones
 const Register: React.FC = () => {
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState(''); // Nuevo estado para email
   const [department, setDepartment] = useState('');
   const [tower, setTower] = useState('');
   const [password, setPassword] = useState('');
@@ -16,7 +17,7 @@ const Register: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !phoneNumber || !department || !tower || !password) {
+    if (!name || !phoneNumber || !email || !department || !tower || !password) {
       setError('Por favor, complete todos los campos.');
       return;
     }
@@ -30,7 +31,8 @@ const Register: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, phoneNumber, department, tower, password }),
+        // Se envía también el campo email
+        body: JSON.stringify({ name, phoneNumber, email, department, tower, password }),
       });
 
       const data = await response.json();
@@ -82,6 +84,18 @@ const Register: React.FC = () => {
               onChange={(e) => setPhoneNumber(e.target.value)}
               className="w-full px-4 py-2 mt-2 text-gray-700 bg-gray-100 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Ingresa tu número de teléfono"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 mt-2 text-gray-700 bg-gray-100 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Ingresa tu correo electrónico"
               required
             />
           </div>
