@@ -48,7 +48,7 @@ const App: React.FC = () => {
         <Route path="/navbar" element={<Navbar />} />
         <Route path="/notificaciones" element={<Notificaciones />} />
         <Route path="/reset" element={<Reset />} />
-        <Route path="/restablecer/:token" element={<Restablecer />} />
+        <Route path="/restablecer/:token" element={<Restablecer />} />    
       </Routes>
     </Router>
   );
